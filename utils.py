@@ -46,6 +46,7 @@ def displayStats(stats1, stats2):
         "goals",
         "assists",
         "points",
+        "plusMinus",
         "pim",
         "powerPlayGoals",
         "powerPlayPoints",
@@ -75,7 +76,7 @@ def displayStats(stats1, stats2):
     }
 
     colorList = computeColorList(stats1, stats2, keys)
-    limits = {k: 1.1*(stats1[k] + stats2[k])+1 for k in set(stats1) if k in keys}
+    limits = {k: 1.1*(abs(stats1[k]) + abs(stats2[k]))+1 for k in set(stats1) if k in keys}
 
     layouts = {}
     layouts["xaxis"] = {}
@@ -89,7 +90,7 @@ def displayStats(stats1, stats2):
             fig.append_trace(
                 go.Bar(
                     y=[key],
-                    x=[stats1[key]],
+                    x=[abs(stats1[key])],
                     orientation="h",
                     text=stats1[key],
                     textposition="outside",
@@ -108,7 +109,7 @@ def displayStats(stats1, stats2):
             fig.append_trace(
                 go.Bar(
                     y=[f"{abbr[key]:{' '}<{8}}"],
-                    x=[stats2[key]],
+                    x=[abs(stats2[key])],
                     orientation="h",
                     text=stats2[key],
                     textposition="outside",
@@ -118,6 +119,6 @@ def displayStats(stats1, stats2):
             layouts['xaxis'+str(i+1)] = {}
             layouts["xaxis"+str(i+1)]["range"] = [0, limits[key]]
 
-    fig.update_layout(**layouts, showlegend=False, height=500)
+    fig.update_layout(**layouts, showlegend=False, height=500, font={"family":"Arial"})
     fig.update_xaxes(showticklabels=False, showgrid=False)
     st.plotly_chart(fig, use_container_width=True, config={"staticPlot":True})
