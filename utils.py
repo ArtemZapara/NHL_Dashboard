@@ -3,12 +3,21 @@ import pickle
 import requests
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from PIL import Image
 
 @st.cache(show_spinner=False)
 def unpickle(file):
     with open(f"./data/{file}", "rb") as f:
         data = pickle.load(f)
     return data
+
+@st.cache(show_spinner=False)
+def fetchPlayerInfo(playerList, selected):
+    playerID = playerList[selected]["id"]
+    age = playerList[selected]["currentAge"]
+    height = playerList[selected]["height"]
+    weight = playerList[selected]["weight"]
+    return playerID, age, height, weight
 
 @st.cache(show_spinner=False)
 def checkImageURL(ID):
@@ -80,7 +89,7 @@ def displayStats(stats1, stats2):
 
     layouts = {}
     layouts["xaxis"] = {}
-    fig = go.Figure()
+    # fig = go.Figure()
     fig = make_subplots(rows=len(keys), cols=2)
     for i in range(2*len(keys)):
         row = (i+2)//2
@@ -121,4 +130,88 @@ def displayStats(stats1, stats2):
 
     fig.update_layout(**layouts, showlegend=False, height=500, font={"family":"Arial"})
     fig.update_xaxes(showticklabels=False, showgrid=False)
-    st.plotly_chart(fig, use_container_width=True, config={"staticPlot":True})
+
+    return fig
+
+@st.cache(show_spinner=False)
+def displayScores(scores1, scores2):
+    arena = Image.open("./data/halfRink.png")
+
+    xcoords1 = [i["x"] for i in scores1]
+    ycoords1 = [i["y"] for i in scores1]
+    xcoords2 = [i["x"] for i in scores2]
+    ycoords2 = [i["y"] for i in scores2]
+
+    fig = make_subplots(rows=1, cols=2, horizontal_spacing = 0.02)
+    fig.add_layout_image(
+        dict(
+            source=arena,
+            xref="x",
+            yref="y",
+            x=0,
+            y=42.5,
+            sizex=100,
+            sizey=85,
+            sizing="stretch",
+            opacity=1.0,
+            layer="below"),
+        row=1,
+        col=1
+    )
+
+    fig.add_layout_image(
+        dict(
+            source=arena,
+            xref="x",
+            yref="y",
+            x=0,
+            y=42.5,
+            sizex=100,
+            sizey=85,
+            sizing="stretch",
+            opacity=1.0,
+            layer="below"),
+        row=1,
+        col=2
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=xcoords1,
+            y=ycoords1,
+            mode="markers",
+            marker=dict(size=12, color="limegreen", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
+        ),
+        row=1,
+        col=1
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=xcoords2,
+            y=ycoords2,
+            mode="markers",
+            marker=dict(size=12, color="limegreen", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
+        ),
+        row=1,
+        col=2
+    )
+
+    fig.update_layout(
+        yaxis_scaleanchor="x",
+        xaxis_showticklabels=False,
+        yaxis_showticklabels=False,
+        xaxis_range=[0,100],
+        yaxis_range=[-42.5,42.5],
+        yaxis2_scaleanchor="x",
+        xaxis2_showticklabels=False,
+        yaxis2_showticklabels=False,
+        xaxis2_range=[0,100],
+        yaxis2_range=[-42.5,42.5],
+        width=2*100*6,
+        height=52*6,
+        margin=dict(b=0, t=0, l=0, r=0),
+        showlegend=False
+    )
+
+    return fig

@@ -6,6 +6,9 @@ st.set_page_config(layout="wide")
 st.title(":ice_hockey_stick_and_puck: NHL Dashboard")
 
 playerList = unpickle("playerList.pkl")
+teamList = unpickle("teamList.pkl")
+allScores = unpickle("allScores2021.pkl")
+
 seasons = ["20212022"]
 
 col1, col2, col3 = st.columns([1,2.5,1])
@@ -20,12 +23,7 @@ with col1:
             else  f"({playerList[x]['primaryPosition']['code']}) {playerList[x]['fullName']}"
     )
 
-    playerID1 = playerList[select1]["id"]
-    age1 = playerList[select1]["currentAge"]
-    height1 = playerList[select1]["height"]
-    weight1 = playerList[select1]["weight"]
-    # st.write(playerList[select1])
-
+    playerID1, age1, height1, weight1 = fetchPlayerInfo(playerList, select1)
     imageURL1 = checkImageURL(playerID1)
     st.image(imageURL1)
     st.write(f"Age: {age1}")
@@ -43,11 +41,7 @@ with col3:
             else  f"({playerList[x]['primaryPosition']['code']}) {playerList[x]['fullName']}"
     )
 
-    playerID2 = playerList[select2]["id"]
-    age2 = playerList[select2]["currentAge"]
-    height2 = playerList[select2]["height"]
-    weight2 = playerList[select2]["weight"]
-
+    playerID2, age2, height2, weight2 = fetchPlayerInfo(playerList, select2)
     imageURL2 = checkImageURL(playerID2)
     st.image(imageURL2)
     st.write(f"Age: {age2}")
@@ -65,4 +59,13 @@ with col2:
     stats1 = loadStats(playerID1, selectedSeason)
     stats2 = loadStats(playerID2, selectedSeason)
     if st.button(label="Get stats"):
-        displayStats(stats1, stats2)
+        figureStats = displayStats(stats1, stats2)
+        st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
+
+        scores1 = [i[playerID1] for i in allScores if playerID1 in i.keys()]
+        scores2 = [i[playerID2] for i in allScores if playerID2 in i.keys()]
+
+        st.write(len(scores1), len(scores2))
+
+        figureScores = displayScores(scores1, scores2)
+        st.plotly_chart(figureScores, use_container_width=True, config={"staticPlot":True})
