@@ -7,8 +7,6 @@ st.title(":ice_hockey_stick_and_puck: NHL Dashboard")
 
 playerList = unpickle("playerList.pkl")
 teamList = unpickle("teamList.pkl")
-allScores = unpickle("allScores2021.pkl")
-
 seasons = ["20212022"]
 
 col1, col2, col3 = st.columns([1,2.5,1])
@@ -62,10 +60,19 @@ with col2:
         figureStats = displayStats(stats1, stats2)
         st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
 
-        scores1 = [i[playerID1] for i in allScores if playerID1 in i.keys()]
-        scores2 = [i[playerID2] for i in allScores if playerID2 in i.keys()]
+        allScores = unpickle("allScores2021.pkl")
+        allShots = unpickle("allShots2021.pkl")
 
-        st.write(len(scores1), len(scores2))
+        scores1, scores2 = list(), list()
+        shots1, shots2 = list(), list()
+        if playerID1 in allScores:
+            scores1 = allScores[playerID1]
+        if playerID2 in allScores:
+            scores2 = allScores[playerID2]
+        if playerID1 in allShots:
+            shots1 = allShots[playerID1]
+        if playerID2 in allShots:
+            shots2 = allShots[playerID2]
 
-        figureScores = displayScores(scores1, scores2)
+        figureScores = displayScores(scores1, scores2, shots1, shots2)
         st.plotly_chart(figureScores, use_container_width=True, config={"staticPlot":True})

@@ -1,3 +1,4 @@
+from turtle import title
 import streamlit as st
 import pickle
 import requests
@@ -5,7 +6,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from PIL import Image
 
-@st.cache(show_spinner=False)
+@st.cache(show_spinner=False, allow_output_mutation=True)
 def unpickle(file):
     with open(f"./data/{file}", "rb") as f:
         data = pickle.load(f)
@@ -14,7 +15,10 @@ def unpickle(file):
 @st.cache(show_spinner=False)
 def fetchPlayerInfo(playerList, selected):
     playerID = playerList[selected]["id"]
-    age = playerList[selected]["currentAge"]
+    if "currentAge" in playerList[selected]:
+        age = playerList[selected]["currentAge"]
+    else:
+        age = "No data"
     height = playerList[selected]["height"]
     weight = playerList[selected]["weight"]
     return playerID, age, height, weight
@@ -89,7 +93,6 @@ def displayStats(stats1, stats2):
 
     layouts = {}
     layouts["xaxis"] = {}
-    # fig = go.Figure()
     fig = make_subplots(rows=len(keys), cols=2)
     for i in range(2*len(keys)):
         row = (i+2)//2
@@ -134,13 +137,18 @@ def displayStats(stats1, stats2):
     return fig
 
 @st.cache(show_spinner=False)
-def displayScores(scores1, scores2):
+def displayScores(scores1, scores2, shots1, shots2):
     arena = Image.open("./data/halfRink.png")
 
-    xcoords1 = [i["x"] for i in scores1]
-    ycoords1 = [i["y"] for i in scores1]
-    xcoords2 = [i["x"] for i in scores2]
-    ycoords2 = [i["y"] for i in scores2]
+    xScores1 = [i["x"] for i in scores1]
+    yScores1 = [i["y"] for i in scores1]
+    xScores2 = [i["x"] for i in scores2]
+    yScores2 = [i["y"] for i in scores2]
+
+    xShots1 = [i["x"] for i in shots1]
+    yShots1 = [i["y"] for i in shots1]
+    xShots2 = [i["x"] for i in shots2]
+    yShots2 = [i["y"] for i in shots2]
 
     fig = make_subplots(rows=1, cols=2, horizontal_spacing = 0.02)
     fig.add_layout_image(
@@ -177,8 +185,30 @@ def displayScores(scores1, scores2):
 
     fig.add_trace(
         go.Scatter(
-            x=xcoords1,
-            y=ycoords1,
+            x=xShots1,
+            y=yShots1,
+            mode="markers",
+            marker=dict(size=12, color="darkorange", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
+        ),
+        row=1,
+        col=1
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=xShots2,
+            y=yShots2,
+            mode="markers",
+            marker=dict(size=12, color="darkorange", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
+        ),
+        row=1,
+        col=2
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=xScores1,
+            y=yScores1,
             mode="markers",
             marker=dict(size=12, color="limegreen", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
         ),
@@ -188,13 +218,52 @@ def displayScores(scores1, scores2):
 
     fig.add_trace(
         go.Scatter(
-            x=xcoords2,
-            y=ycoords2,
+            x=xScores2,
+            y=yScores2,
             mode="markers",
             marker=dict(size=12, color="limegreen", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
         ),
         row=1,
         col=2
+    )
+
+    fig.update_layout(
+        updatemenus=[
+            dict(
+                type="buttons",
+                direction="right",
+                showactive=True,
+                x=0.4,
+                xanchor="left",
+                y=1.16,
+                yanchor="top",
+                buttons=list(
+                    [
+                        dict(
+                            label="Goals",
+                            method="update",
+                            args=[
+                                {"visible": [False, False, True, True]}
+                            ]
+                        ),
+                        dict(
+                            label="Shots",
+                            method="update",
+                            args=[
+                                {"visible": [True, True, False, False]}
+                            ]
+                        ),
+                        dict(
+                            label="Both",
+                            method="update",
+                            args=[
+                                {"visible": [True, True, True, True]}
+                            ]
+                        )
+                    ]
+                )
+            )
+        ]
     )
 
     fig.update_layout(
@@ -209,9 +278,13 @@ def displayScores(scores1, scores2):
         xaxis2_range=[0,100],
         yaxis2_range=[-42.5,42.5],
         width=2*100*6,
-        height=52*6,
+        height=60*6,
         margin=dict(b=0, t=0, l=0, r=0),
         showlegend=False
     )
+
+    for trace in fig.data:
+        if trace["marker"]["color"] == "darkorange":
+            trace.update(visible=False)
 
     return fig
