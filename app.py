@@ -9,6 +9,15 @@ playerList = unpickle("playerList.pkl")
 teamList = unpickle("teamList.pkl")
 seasons = ["20212022"]
 
+hide_img_fs = '''
+<style>
+button[title="View fullscreen"]{
+    visibility: hidden;}
+</style>
+'''
+
+st.markdown(hide_img_fs, unsafe_allow_html=True)
+
 col1, col2, col3 = st.columns([1,2.5,1])
 with col1:
     select1 = st.selectbox(
@@ -21,7 +30,7 @@ with col1:
             else  f"({playerList[x]['primaryPosition']['code']}) {playerList[x]['fullName']}"
     )
 
-    playerID1, age1, height1, weight1 = fetchPlayerInfo(playerList, select1)
+    playerID1, age1, height1, weight1, position1 = fetchPlayerInfo(playerList, select1)
     imageURL1 = checkImageURL(playerID1)
     st.image(imageURL1)
     st.write(f"Age: {age1}")
@@ -39,7 +48,7 @@ with col3:
             else  f"({playerList[x]['primaryPosition']['code']}) {playerList[x]['fullName']}"
     )
 
-    playerID2, age2, height2, weight2 = fetchPlayerInfo(playerList, select2)
+    playerID2, age2, height2, weight2, position2 = fetchPlayerInfo(playerList, select2)
     imageURL2 = checkImageURL(playerID2)
     st.image(imageURL2)
     st.write(f"Age: {age2}")
@@ -57,22 +66,30 @@ with col2:
     stats1 = loadStats(playerID1, selectedSeason)
     stats2 = loadStats(playerID2, selectedSeason)
     if st.button(label="Get stats"):
-        figureStats = displayStats(stats1, stats2)
-        st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
+        if position1 != "G" and position2 != "G":
+            figureStats = displayStats(stats1, stats2, playerType="F")
+            st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
 
-        allScores = unpickle("allScores2021.pkl")
-        allShots = unpickle("allShots2021.pkl")
+            allScores = unpickle("allScores2021.pkl")
+            allShots = unpickle("allShots2021.pkl")
 
-        scores1, scores2 = list(), list()
-        shots1, shots2 = list(), list()
-        if playerID1 in allScores:
-            scores1 = allScores[playerID1]
-        if playerID2 in allScores:
-            scores2 = allScores[playerID2]
-        if playerID1 in allShots:
-            shots1 = allShots[playerID1]
-        if playerID2 in allShots:
-            shots2 = allShots[playerID2]
+            scores1, scores2 = list(), list()
+            shots1, shots2 = list(), list()
+            if playerID1 in allScores:
+                scores1 = allScores[playerID1]
+            if playerID2 in allScores:
+                scores2 = allScores[playerID2]
+            if playerID1 in allShots:
+                shots1 = allShots[playerID1]
+            if playerID2 in allShots:
+                shots2 = allShots[playerID2]
 
-        figureScores = displayScores(scores1, scores2, shots1, shots2)
-        st.plotly_chart(figureScores, use_container_width=True, config={"staticPlot":True})
+            figureScores = displayScores(scores1, scores2, shots1, shots2)
+            st.plotly_chart(figureScores, use_container_width=True, config={"staticPlot":True})
+
+        elif position1 == "G" and position2 == "G":
+            figureStats = displayStats(stats1, stats2, playerType="G")
+            st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
+
+        else:
+            st.error("You cannot compare a field player with a goaltender!")

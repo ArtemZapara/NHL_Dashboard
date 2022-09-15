@@ -1,10 +1,10 @@
-from turtle import title
 import streamlit as st
 import pickle
 import requests
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from PIL import Image
+from datetime import date, datetime
 
 @st.cache(show_spinner=False, allow_output_mutation=True)
 def unpickle(file):
@@ -17,11 +17,17 @@ def fetchPlayerInfo(playerList, selected):
     playerID = playerList[selected]["id"]
     if "currentAge" in playerList[selected]:
         age = playerList[selected]["currentAge"]
+    elif "birthDate" in playerList[selected]:
+        birthDate = playerList[selected]["birthDate"]
+        born = datetime.strptime(birthDate, "%Y-%m-%d")
+        today = date.today()
+        age = today.year - born.year - ((today.month, today.day) < (born.month, born.day))
     else:
         age = "No data"
     height = playerList[selected]["height"]
     weight = playerList[selected]["weight"]
-    return playerID, age, height, weight
+    primaryPosition = playerList[selected]["primaryPosition"]["code"]
+    return playerID, age, height, weight, primaryPosition
 
 @st.cache(show_spinner=False)
 def checkImageURL(ID):
@@ -39,7 +45,7 @@ def loadStats(ID, season):
     stats = statsData["stats"][0]["splits"][0]["stat"]
     return stats
 
-def displayStats(stats1, stats2):
+def displayStats(stats1, stats2, playerType):
     def computeColorList(dict1, dict2, keys):
         colorList = list()
         for key in keys:
@@ -54,22 +60,37 @@ def displayStats(stats1, stats2):
                 colorList.append("darkgrey")
         return colorList
 
-    keys = [
-        "games",
-        "goals",
-        "assists",
-        "points",
-        "plusMinus",
-        "pim",
-        "powerPlayGoals",
-        "powerPlayPoints",
-        "shortHandedGoals",
-        "shortHandedPoints",
-        "gameWinningGoals",
-        "overTimeGoals",
-        "shots",
-        "shotPct"
-    ]
+    if playerType == "F":
+        keys = [
+            "games",
+            "goals",
+            "assists",
+            "points",
+            "plusMinus",
+            "pim",
+            "powerPlayGoals",
+            "powerPlayPoints",
+            "shortHandedGoals",
+            "shortHandedPoints",
+            "gameWinningGoals",
+            "overTimeGoals",
+            "shots",
+            "shotPct"
+        ]
+    if playerType == "G":
+        keys = [
+            "games",
+            "gamesStarted",
+            "wins",
+            "losses",
+            "ties",
+            "ot",
+            "shotsAgainst",
+            "goalsAgainst",
+            "goalAgainstAverage",
+            "savePercentage",
+            "shutouts"
+        ]
 
     abbr = {
         "games": "GP",
@@ -85,11 +106,21 @@ def displayStats(stats1, stats2):
         "gameWinningGoals": "GWG",
         "overTimeGoals": "OTG",
         "shots": "S",
-        "shotPct": "S%"
+        "shotPct": "S%",
+        "gamesStarted": "GS",
+        "wins": "W",
+        "losses": "L",
+        "ties": "T",
+        "ot": "OT",
+        "shotsAgainst": "SA",
+        "goalsAgainst": "GA",
+        "goalAgainstAverage": "GAA",
+        "savePercentage": "SV%",
+        "shutouts": "SO"
     }
 
     colorList = computeColorList(stats1, stats2, keys)
-    limits = {k: 1.1*(abs(stats1[k]) + abs(stats2[k]))+1 for k in set(stats1) if k in keys}
+    limits = {k: 1.1*(abs(stats1[k]) + abs(stats2[k]))+0.05 for k in set(stats1) if k in keys}
 
     layouts = {}
     layouts["xaxis"] = {}
@@ -188,7 +219,7 @@ def displayScores(scores1, scores2, shots1, shots2):
             x=xShots1,
             y=yShots1,
             mode="markers",
-            marker=dict(size=12, color="darkorange", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
+            marker=dict(size=12, color="orangered", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
         ),
         row=1,
         col=1
@@ -199,7 +230,7 @@ def displayScores(scores1, scores2, shots1, shots2):
             x=xShots2,
             y=yShots2,
             mode="markers",
-            marker=dict(size=12, color="darkorange", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
+            marker=dict(size=12, color="orangered", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
         ),
         row=1,
         col=2
@@ -210,7 +241,7 @@ def displayScores(scores1, scores2, shots1, shots2):
             x=xScores1,
             y=yScores1,
             mode="markers",
-            marker=dict(size=12, color="limegreen", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
+            marker=dict(size=12, color="lime", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
         ),
         row=1,
         col=1
@@ -221,7 +252,7 @@ def displayScores(scores1, scores2, shots1, shots2):
             x=xScores2,
             y=yScores2,
             mode="markers",
-            marker=dict(size=12, color="limegreen", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
+            marker=dict(size=12, color="lime", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
         ),
         row=1,
         col=2
@@ -284,7 +315,7 @@ def displayScores(scores1, scores2, shots1, shots2):
     )
 
     for trace in fig.data:
-        if trace["marker"]["color"] == "darkorange":
+        if trace["marker"]["color"] == "orangered":
             trace.update(visible=False)
 
     return fig
