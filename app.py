@@ -115,6 +115,7 @@ with col2:
         figureStats = displayStats(stats1, stats2, playerType="F")
         st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
 
+<<<<<<< HEAD
         allScores1 = unpickle(f"{selectedSeason1}/allScores.pkl")
         allShots1 = unpickle(f"{selectedSeason1}/allShots.pkl")
         allScores2 = unpickle(f"{selectedSeason2}/allScores.pkl")
@@ -130,6 +131,21 @@ with col2:
             scores2 = allScores2[playerID2]
         if playerID2 in allShots2:
             shots2 = allShots2[playerID2]
+=======
+        allScores = unpickle(f"{selectedSeason1}/allScores.pkl")
+        allShots = unpickle(f"{selectedSeason2}/allShots.pkl")
+
+        scores1, scores2 = list(), list()
+        shots1, shots2 = list(), list()
+        if playerID1 in allScores:
+            scores1 = allScores[playerID1]
+        if playerID2 in allScores:
+            scores2 = allScores[playerID2]
+        if playerID1 in allShots:
+            shots1 = allShots[playerID1]
+        if playerID2 in allShots:
+            shots2 = allShots[playerID2]
+>>>>>>> 92335d9186961bd0f16f408ba626c8feb07427af
 
         figureScores = displayScores(scores1, scores2, shots1, shots2)
         st.plotly_chart(figureScores, use_container_width=True, config={"staticPlot":True})
