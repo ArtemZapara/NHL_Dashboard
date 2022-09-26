@@ -1,3 +1,4 @@
+from __future__ import annotations
 import streamlit as st
 import pickle
 import requests
@@ -8,6 +9,15 @@ from datetime import date, datetime
 
 @st.cache(show_spinner=False, allow_output_mutation=True)
 def unpickle(file):
+    """This helper function loads a file in the pickle format
+    from the ./data/ folder.
+
+    Args:
+        file (str): name of the file to be loaded
+
+    Returns:
+        data: loaded data
+    """
     with open(f"./data/{file}", "rb") as f:
         data = pickle.load(f)
     return data
@@ -39,11 +49,66 @@ def checkImageURL(ID):
 
 @st.cache(show_spinner=False)
 def loadStats(ID, season):
+    """This function loads single season statistics for a player.
+
+    Args:
+        ID (int): player ID
+        season (str): season in the format YYYYYYYY
+
+    Returns:
+        stats (dict): dictionary with statistics d
+    """
     statsURL = f"https://statsapi.web.nhl.com/api/v1/people/{ID}/stats?stats=statsSingleSeason&season={season}"
     response = requests.get(url=statsURL)
     statsData = response.json()
     stats = statsData["stats"][0]["splits"][0]["stat"]
     return stats
+
+@st.cache(show_spinner=False)
+def loadTeams(season):
+    seasonURL = f"https://statsapi.web.nhl.com/api/v1/standings?season={season}"
+    r = requests.get(url=seasonURL)
+    data = r.json()
+    records = data["records"]
+    teams = list()
+    for record in records:
+        for team in record["teamRecords"]:
+            teams.append(team["team"])
+    teams = sorted(teams, key = lambda x: x["name"])
+    return teams
+
+@st.cache(show_spinner=False)
+def loadRoster(teamID, season):
+    rosterURL = f"https://statsapi.web.nhl.com/api/v1/teams/{teamID}?expand=team.roster&season={season}"
+    r = requests.get(url=rosterURL)
+    data = r.json()
+    roster = data["teams"][0]["roster"]["roster"]
+    roster = sorted(roster, key = lambda x: x["person"]["fullName"])
+    return roster
+
+@st.cache(show_spinner=False)
+def loadPlayerInfo(playerID):
+    playerURL = f"https://statsapi.web.nhl.com/api/v1/people/{playerID}"
+    r = requests.get(url=playerURL)
+    data = r.json()
+    playerInfo = data["people"][0]
+    return playerInfo
+
+@st.cache(show_spinner=False)
+def parseInfo(playerInfo):
+    if "currentAge" in playerInfo:
+        age = playerInfo["currentAge"]
+    elif "birthDate" in playerInfo:
+        birthDate = playerInfo["birthDate"]
+        born = datetime.strptime(birthDate, "%Y-%m-%d")
+        today = date.today()
+        age = today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+    else:
+        age = "No data"
+    height = playerInfo["height"]
+    weight = playerInfo["weight"]
+    primaryPosition = playerInfo["primaryPosition"]["code"]
+    return age, height, weight, primaryPosition
 
 def displayStats(stats1, stats2, playerType):
     def computeColorList(dict1, dict2, keys):
@@ -83,7 +148,6 @@ def displayStats(stats1, stats2, playerType):
             "gamesStarted",
             "wins",
             "losses",
-            "ties",
             "ot",
             "shotsAgainst",
             "goalsAgainst",
@@ -110,7 +174,6 @@ def displayStats(stats1, stats2, playerType):
         "gamesStarted": "GS",
         "wins": "W",
         "losses": "L",
-        "ties": "T",
         "ot": "OT",
         "shotsAgainst": "SA",
         "goalsAgainst": "GA",
@@ -137,7 +200,7 @@ def displayStats(stats1, stats2, playerType):
                     orientation="h",
                     text=stats1[key],
                     textposition="outside",
-                    marker={"color": colorList[i]}),
+                    marker={"color": colorList[i], "line":{"color":"black"}}),
                     row=row,
                     col=1
                 )
@@ -151,12 +214,12 @@ def displayStats(stats1, stats2, playerType):
         else:
             fig.append_trace(
                 go.Bar(
-                    y=[f"{abbr[key]:{' '}<{8}}"],
+                    y=[f"{abbr[key]:{' '}<{10}}"],
                     x=[abs(stats2[key])],
                     orientation="h",
                     text=stats2[key],
                     textposition="outside",
-                    marker={"color": colorList[i]}),
+                    marker={"color": colorList[i], "line":{"color":"black"}}),
                     row=row,
                     col=2)
             layouts['xaxis'+str(i+1)] = {}
@@ -264,9 +327,9 @@ def displayScores(scores1, scores2, shots1, shots2):
                 type="buttons",
                 direction="right",
                 showactive=True,
-                x=0.4,
+                x=0.42,
                 xanchor="left",
-                y=1.16,
+                y=1.12,
                 yanchor="top",
                 buttons=list(
                     [
@@ -303,13 +366,11 @@ def displayScores(scores1, scores2, shots1, shots2):
         yaxis_showticklabels=False,
         xaxis_range=[0,100],
         yaxis_range=[-42.5,42.5],
-        yaxis2_scaleanchor="x",
+        yaxis2_scaleanchor="x2",
         xaxis2_showticklabels=False,
         yaxis2_showticklabels=False,
         xaxis2_range=[0,100],
         yaxis2_range=[-42.5,42.5],
-        width=2*100*6,
-        height=60*6,
         margin=dict(b=0, t=0, l=0, r=0),
         showlegend=False
     )
