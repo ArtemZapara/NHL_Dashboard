@@ -210,7 +210,7 @@ def displayStats(stats1, stats2, playerType):
         else:
             fig.append_trace(
                 go.Bar(
-                    y=[f"{abbr[key]:{' '}<{10}}"],
+                    y=[f"{abbr[key]:{' '}<{12}}"],
                     x=[abs(stats2[key])],
                     orientation="h",
                     text=stats2[key],
@@ -221,14 +221,18 @@ def displayStats(stats1, stats2, playerType):
             layouts["xaxis"+str(i+1)] = {}
             layouts["xaxis"+str(i+1)]["range"] = [0, limits[key]]
 
-    fig.update_layout(**layouts, showlegend=False, height=500, font={"family":"Arial"})
+    fig.update_layout(**layouts,
+        showlegend=False,
+        height=500,
+        font={"family":"Arial"},
+        margin=dict(b=0, t=0, l=0, r=0))
     fig.update_xaxes(showticklabels=False, showgrid=False)
 
     return fig
 
 @st.cache(show_spinner=False)
 def displayScores(scores1, scores2, shots1, shots2):
-    arena = Image.open("./data/halfRink.png")
+    arena = Image.open("./data/rink.png")
 
     xScores1 = [i["x"] for i in scores1]
     yScores1 = [i["y"] for i in scores1]
@@ -240,16 +244,16 @@ def displayScores(scores1, scores2, shots1, shots2):
     xShots2 = [i["x"] for i in shots2]
     yShots2 = [i["y"] for i in shots2]
 
-    fig = make_subplots(rows=1, cols=2, horizontal_spacing = 0.02)
+    fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.0)
     fig.add_layout_image(
         dict(
             source=arena,
             xref="x",
             yref="y",
-            x=0,
-            y=42.5,
-            sizex=100,
-            sizey=85,
+            x=-42.5,
+            y=100,
+            sizex=85,
+            sizey=200,
             sizing="stretch",
             opacity=1.0,
             layer="below"),
@@ -262,10 +266,10 @@ def displayScores(scores1, scores2, shots1, shots2):
             source=arena,
             xref="x",
             yref="y",
-            x=0,
-            y=42.5,
-            sizex=100,
-            sizey=85,
+            x=-42.5,
+            y=100,
+            sizex=85,
+            sizey=200,
             sizing="stretch",
             opacity=1.0,
             layer="below"),
@@ -275,8 +279,8 @@ def displayScores(scores1, scores2, shots1, shots2):
 
     fig.add_trace(
         go.Scatter(
-            x=xShots1,
-            y=yShots1,
+            x=yShots1,
+            y=xShots1,
             mode="markers",
             marker=dict(size=12, color="orangered", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
         ),
@@ -286,8 +290,8 @@ def displayScores(scores1, scores2, shots1, shots2):
 
     fig.add_trace(
         go.Scatter(
-            x=xShots2,
-            y=yShots2,
+            x=yShots2,
+            y=xShots2,
             mode="markers",
             marker=dict(size=12, color="orangered", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
         ),
@@ -297,8 +301,8 @@ def displayScores(scores1, scores2, shots1, shots2):
 
     fig.add_trace(
         go.Scatter(
-            x=xScores1,
-            y=yScores1,
+            x=yScores1,
+            y=xScores1,
             mode="markers",
             marker=dict(size=12, color="lime", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
         ),
@@ -308,8 +312,8 @@ def displayScores(scores1, scores2, shots1, shots2):
 
     fig.add_trace(
         go.Scatter(
-            x=xScores2,
-            y=yScores2,
+            x=yScores2,
+            y=xScores2,
             mode="markers",
             marker=dict(size=12, color="lime", opacity=0.8, line=dict(width=2, color="DarkSlateGrey"))
         ),
@@ -325,7 +329,7 @@ def displayScores(scores1, scores2, shots1, shots2):
                 showactive=True,
                 x=0.42,
                 xanchor="left",
-                y=1.12,
+                y=1.05,
                 yanchor="top",
                 buttons=list(
                     [
@@ -360,19 +364,29 @@ def displayScores(scores1, scores2, shots1, shots2):
         yaxis_scaleanchor="x",
         xaxis_showticklabels=False,
         yaxis_showticklabels=False,
-        xaxis_range=[0,100],
-        yaxis_range=[-42.5,42.5],
+        xaxis_range=[-42.5,42.5],
+        yaxis_range=[-100,100],
+        xaxis_showgrid=False,
+        yaxis_showgrid=False,
+        xaxis_zeroline=False,
+        yaxis_zeroline=False,
         yaxis2_scaleanchor="x2",
         xaxis2_showticklabels=False,
         yaxis2_showticklabels=False,
-        xaxis2_range=[0,100],
-        yaxis2_range=[-42.5,42.5],
+        xaxis2_range=[-42.5,42.5],
+        yaxis2_range=[-100,100],
+        xaxis2_showgrid=False,
+        yaxis2_showgrid=False,
+        xaxis2_zeroline=False,
+        yaxis2_zeroline=False,
         margin=dict(b=0, t=0, l=0, r=0),
-        showlegend=False
+        showlegend=False,
+        height=4*200,
+        width=8*85,
+        template="plotly_white"
     )
 
     for trace in fig.data:
         if trace["marker"]["color"] == "orangered":
             trace.update(visible=False)
-
     return fig

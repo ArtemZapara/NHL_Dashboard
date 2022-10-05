@@ -107,41 +107,52 @@ with col3:
     st.write(f"Weight: {weight2}")
 
 with col2:
+    radioB = st.radio("Type of display", ("Overall stats", "Shot chart"), horizontal=True, label_visibility="collapsed")
 
-    stats1 = loadStats(playerID1, selectedSeason1)
-    stats2 = loadStats(playerID2, selectedSeason2)
+    if radioB == "Overall stats":
+        stats1 = loadStats(playerID1, selectedSeason1)
+        stats2 = loadStats(playerID2, selectedSeason2)
 
-    if position1 != "G" and position2 != "G":
-        figureStats = displayStats(stats1, stats2, playerType="F")
-        st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
+        if position1 != "G" and position2 != "G":
+            figureStats = displayStats(stats1, stats2, playerType="F")
+            st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
 
-        if selectedSeason1 == selectedSeason2:
-            allScores1 = allScores2 = unpickle(f"{selectedSeason1}/allScores.pkl")
-            allShots1 = allShots2 = unpickle(f"{selectedSeason1}/allShots.pkl")
+        elif position1 == "G" and position2 == "G":
+            figureStats = displayStats(stats1, stats2, playerType="G")
+            st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
 
         else:
-            allScores1 = unpickle(f"{selectedSeason1}/allScores.pkl")
-            allShots1 = unpickle(f"{selectedSeason1}/allShots.pkl")
-            allScores2 = unpickle(f"{selectedSeason2}/allScores.pkl")
-            allShots2 = unpickle(f"{selectedSeason2}/allShots.pkl")
+            st.error("You cannot compare a field player with a goaltender!")
 
-        scores1, shots1 = list(), list()
-        scores2, shots2 = list(), list()
-        if playerID1 in allScores1:
-            scores1 = allScores1[playerID1]
-        if playerID1 in allShots1:
-            shots1 = allShots1[playerID1]
-        if playerID2 in allScores2:
-            scores2 = allScores2[playerID2]
-        if playerID2 in allShots2:
-            shots2 = allShots2[playerID2]
+    if radioB == "Shot chart":
 
-        figureScores = displayScores(scores1, scores2, shots1, shots2)
-        st.plotly_chart(figureScores, use_container_width=True, config={"staticPlot":True})
+        if position1 != "G" and position2 != "G":
+            if selectedSeason1 == selectedSeason2:
+                allScores1 = allScores2 = unpickle(f"{selectedSeason1}/allScores.pkl")
+                allShots1 = allShots2 = unpickle(f"{selectedSeason1}/allShots.pkl")
 
-    elif position1 == "G" and position2 == "G":
-        figureStats = displayStats(stats1, stats2, playerType="G")
-        st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
+            else:
+                allScores1 = unpickle(f"{selectedSeason1}/allScores.pkl")
+                allShots1 = unpickle(f"{selectedSeason1}/allShots.pkl")
+                allScores2 = unpickle(f"{selectedSeason2}/allScores.pkl")
+                allShots2 = unpickle(f"{selectedSeason2}/allShots.pkl")
 
-    else:
-        st.error("You cannot compare a field player with a goaltender!")
+            scores1, shots1 = list(), list()
+            scores2, shots2 = list(), list()
+            if playerID1 in allScores1:
+                scores1 = allScores1[playerID1]
+            if playerID1 in allShots1:
+                shots1 = allShots1[playerID1]
+            if playerID2 in allScores2:
+                scores2 = allScores2[playerID2]
+            if playerID2 in allShots2:
+                shots2 = allShots2[playerID2]
+
+            figureScores = displayScores(scores1, scores2, shots1, shots2)
+            st.plotly_chart(figureScores, use_container_width=True, config={"staticPlot":True})
+
+        elif position1 == "G" and position2 == "G":
+            st.write("To be added.")
+
+        else:
+            st.error("You cannot compare a field player with a goaltender!")
