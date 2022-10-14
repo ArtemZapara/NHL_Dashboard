@@ -390,3 +390,111 @@ def displayScores(scores1, scores2, shots1, shots2):
         if trace["marker"]["color"] == "orangered":
             trace.update(visible=False)
     return fig
+
+@st.cache(show_spinner=False)
+def displayTeamLogo(logoURL):
+
+    fig = go.Figure()
+
+    fig.add_layout_image(
+        dict(
+            source=logoURL,
+            xref="paper",
+            yref="paper",
+            x=0.5,
+            y=0.5,
+            sizex=1.0,
+            sizey=1.0,
+            xanchor="center",
+            yanchor="middle",
+            opacity=1.0,
+            layer="above"
+        )
+    )
+
+    fig.update_layout(
+        yaxis_scaleanchor="x",
+        yaxis_scaleratio=1,
+        xaxis_range=[0,1],
+        yaxis_range=[0,1],
+        xaxis_showticklabels=False,
+        yaxis_showticklabels=False,
+        xaxis_showgrid=False,
+        yaxis_showgrid=False,
+        height=100,
+        template="plotly_white",
+        margin=dict(b=0, t=0, l=0, r=0)
+    )
+
+    return fig
+
+@st.cache(show_spinner=False)
+def displayPlayerInfo(age, height, weight):
+
+    s1 = f"{'Age':<8}{age:>10}"
+    s2 = f"{'Height':<8}{height:>10}"
+    s3 = f"{'Weight':<8}{weight:>10}"
+
+    fig = go.Figure()
+
+    fig.add_annotation(
+        x=0.5,
+        y=0.8,
+        xref="paper",
+        yref="paper",
+        xanchor="center",
+        yanchor="middle",
+        align="left",
+        text=s1,
+        font=dict(
+            family="Arial",
+            size=20
+            ),
+        showarrow=False
+    )
+
+    fig.add_annotation(
+        x=0.5,
+        y=0.5,
+        xref="paper",
+        yref="paper",
+        xanchor="center",
+        yanchor="middle",
+        align="left",
+        text=s2,
+        font=dict(
+            family="Arial",
+            size=20
+            ),
+        showarrow=False
+    )
+
+    fig.add_annotation(
+        x=0.5,
+        y=0.2,
+        xref="paper",
+        yref="paper",
+        xanchor="center",
+        yanchor="middle",
+        align="left",
+        text=s3,
+        font=dict(
+            family="Arial",
+            size=20
+            ),
+        showarrow=False
+    )
+
+    fig.update_layout(
+        xaxis_range=[0,1],
+        yaxis_range=[0,1],
+        xaxis_showticklabels=False,
+        yaxis_showticklabels=False,
+        xaxis_showgrid=False,
+        yaxis_showgrid=False,
+        height=100,
+        template="plotly_white",
+        margin=dict(b=0, t=0, l=0, r=0)
+    )
+
+    return fig

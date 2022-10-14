@@ -5,6 +5,7 @@ st.set_page_config(layout="wide")
 st.title(":ice_hockey_stick_and_puck: NHL Dashboard")
 
 playerList = unpickle("playerList.pkl")
+logos = unpickle("teamLogos.pkl")
 seasons = ["20212022","20202021","20192020"]
 
 st.markdown(
@@ -63,10 +64,14 @@ with col1:
 
     age1, height1, weight1, position1 = parseInfo(playerInfo1)
     imageURL1 = checkImageURL(playerID1)
-    st.image(imageURL1)
-    st.write(f"Age: {age1}")
-    st.write(f"Height: {height1}")
-    st.write(f"Weight: {weight1}")
+
+    logoURL1 = logos[teamID1]
+    teamLogo1 = displayTeamLogo(logoURL1)
+    playerCard1 = displayPlayerInfo(age1, weight1, height1)
+
+    st.plotly_chart(teamLogo1, use_container_width=True, config={"staticPlot":True})
+    st.image(imageURL1, use_column_width=True)
+    st.plotly_chart(playerCard1, use_container_width=True, config={"staticPlot":True})
 
 with col3:
     season2 = st.selectbox(
@@ -101,10 +106,14 @@ with col3:
 
     age2, height2, weight2, position2 = parseInfo(playerInfo2)
     imageURL2 = checkImageURL(playerID2)
-    st.image(imageURL2)
-    st.write(f"Age: {age2}")
-    st.write(f"Height: {height2}")
-    st.write(f"Weight: {weight2}")
+
+    logoURL2 = logos[teamID2]
+    teamLogo2 = displayTeamLogo(logoURL2)
+    playerCard2 = displayPlayerInfo(age2, weight2, height2)
+
+    st.plotly_chart(teamLogo2, use_container_width=True, config={"staticPlot":True})
+    st.image(imageURL2, use_column_width=True)
+    st.plotly_chart(playerCard2, use_container_width=True, config={"staticPlot":True})
 
 with col2:
     radioB = st.radio("Type of display", ("Overall stats", "Shot chart"), horizontal=True, label_visibility="collapsed")
