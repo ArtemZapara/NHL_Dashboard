@@ -67,7 +67,7 @@ with col1:
 
     logoURL1 = logos[teamID1]
     teamLogo1 = displayTeamLogo(logoURL1)
-    playerCard1 = displayPlayerInfo(age1, weight1, height1)
+    playerCard1 = displayPlayerInfo(age1, height1, weight1)
 
     st.plotly_chart(teamLogo1, use_container_width=True, config={"staticPlot":True})
     st.image(imageURL1, use_column_width=True)
@@ -109,7 +109,7 @@ with col3:
 
     logoURL2 = logos[teamID2]
     teamLogo2 = displayTeamLogo(logoURL2)
-    playerCard2 = displayPlayerInfo(age2, weight2, height2)
+    playerCard2 = displayPlayerInfo(age2, height2, weight2)
 
     st.plotly_chart(teamLogo2, use_container_width=True, config={"staticPlot":True})
     st.image(imageURL2, use_column_width=True)

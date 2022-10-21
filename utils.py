@@ -431,9 +431,10 @@ def displayTeamLogo(logoURL):
 @st.cache(show_spinner=False)
 def displayPlayerInfo(age, height, weight):
 
-    s1 = f"{'Age':<8}{age:>10}"
-    s2 = f"{'Height':<8}{height:>10}"
-    s3 = f"{'Weight':<8}{weight:>10}"
+    s1 = f"Age               {age}"
+    s2 = f"Height         {height}"
+    s3 = f"Weight      {weight} lb"
+
 
     fig = go.Figure()
 
