@@ -77,6 +77,15 @@ def loadTeams(season):
     return teams
 
 @st.cache(show_spinner=False)
+def loadTeamStats(teamID, season):
+    statsURL = f"https://statsapi.web.nhl.com/api/v1/teams/{teamID}?expand=team.stats&season={season}"
+    r = requests.get(url=statsURL)
+    data = r. json()
+    splits = data["teams"][0]["teamStats"][0]["splits"]
+    teamStats = splits[0]["stat"]
+    return teamStats
+
+@st.cache(show_spinner=False)
 def loadRoster(teamID, season):
     rosterURL = f"https://statsapi.web.nhl.com/api/v1/teams/{teamID}?expand=team.roster&season={season}"
     r = requests.get(url=rosterURL)
@@ -109,7 +118,7 @@ def parseInfo(playerInfo):
     primaryPosition = playerInfo["primaryPosition"]["code"]
     return age, height, weight, primaryPosition
 
-def displayStats(stats1, stats2, playerType):
+def displayStats(stats1, stats2, statsType):
     def computeColorDict(dict1, dict2, keys):
         colorDict = dict()
         for key in keys:
@@ -121,7 +130,7 @@ def displayStats(stats1, stats2, playerType):
                 colorDict[key] = ["darkgrey", "darkgrey"]
         return colorDict
 
-    if playerType == "F":
+    if statsType == "F":
         keys = [
             "games",
             "goals",
@@ -138,7 +147,7 @@ def displayStats(stats1, stats2, playerType):
             "shots",
             "shotPct"
         ]
-    if playerType == "G":
+    if statsType == "G":
         keys = [
             "games",
             "gamesStarted",
@@ -150,6 +159,28 @@ def displayStats(stats1, stats2, playerType):
             "goalAgainstAverage",
             "savePercentage",
             "shutouts"
+        ]
+    if statsType == "T":
+        keys = [
+            "gamesPlayed",
+            "wins",
+            "losses",
+            "ot",
+            "pts",
+            "ptPctg",
+            "goalsPerGame",
+            "goalsAgainstPerGame",
+            "evGGARatio",
+            "powerPlayPercentage",
+            "powerPlayGoals",
+            "powerPlayGoalsAgainst",
+            "powerPlayOpportunities",
+            "shotsPerGame",
+            "shotsAllowed",
+            "faceOffsTaken",
+            "faceOffWinPercentage",
+            "shootingPctg",
+            "savePctg"
         ]
 
     abbr = {
@@ -175,10 +206,31 @@ def displayStats(stats1, stats2, playerType):
         "goalsAgainst": "GA",
         "goalAgainstAverage": "GAA",
         "savePercentage": "SV%",
-        "shutouts": "SO"
+        "shutouts": "SO",
+        "gamesPlayed": "GP",
+        "pts": "PTS",
+        "ptPctg": "PTS%",
+        "goalsPerGame": "G/G",
+        "goalsAgainstPerGame": "GA/G",
+        "evGGARatio": "GGARatio",
+        "powerPlayPercentage": "PP%",
+        "powerPlayGoalsAgainst": "PPGA",
+        "powerPlayOpportunities": "PP",
+        "shotsPerGame": "S/G",
+        "shotsAllowed": "SA/G",
+        "faceOffsTaken": "FO",
+        "faceOffWinPercentage": "FO%",
+        "shootingPctg": "S%",
+        "savePctg": "SAVE%"
+
     }
 
     colorDict = computeColorDict(stats1, stats2, keys)
+
+    if statsType == "T":
+        stats1 = {k:int(float(v)) if int(float(v)) == float(v) else float(v) for k,v in stats1.items()}
+        stats2 = {k:int(float(v)) if int(float(v)) == float(v) else float(v) for k,v in stats2.items()}
+
     limits = {k: 1.1*(abs(stats1[k]) + abs(stats2[k]))+0.05 for k in set(stats1) if k in keys}
 
     layouts = {}
