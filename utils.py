@@ -147,6 +147,12 @@ def displayStats(stats1, stats2, statsType):
             "shots",
             "shotPct"
         ]
+        footnote_string = f"""GP - Games Played; G - Goals; A - Assists; P - Points; +/- - Plus/Minus;
+                                PIM - Penalty Minutes; PPG - Power Play Goals; PPP - Powe Play Points;
+                                SHG - Shorthanded Goals; SHG - Shorthanded Points; GWG - Game Winning Goals;
+                                OTG - Overtime Goals; S - Shots; S% - Shooting Percentage
+                            """
+
     if statsType == "G":
         keys = [
             "games",
@@ -160,6 +166,11 @@ def displayStats(stats1, stats2, statsType):
             "savePercentage",
             "shutouts"
         ]
+        footnote_string = f"""GP - Games Played; GS - Games Started; W - Wins; L - Losses; OT - Overtime losses;
+                              SA - Shots Against; GA - Goals Against; GAA - Goals Against Average;
+                              SV% - Save Percentage; SO - Shutouts
+                            """
+
     if statsType == "T":
         keys = [
             "gamesPlayed",
@@ -171,10 +182,10 @@ def displayStats(stats1, stats2, statsType):
             "goalsPerGame",
             "goalsAgainstPerGame",
             "evGGARatio",
+            "powerPlayOpportunities",
             "powerPlayPercentage",
             "powerPlayGoals",
             "powerPlayGoalsAgainst",
-            "powerPlayOpportunities",
             "shotsPerGame",
             "shotsAllowed",
             "faceOffsTaken",
@@ -182,6 +193,14 @@ def displayStats(stats1, stats2, statsType):
             "shootingPctg",
             "savePctg"
         ]
+
+        footnote_string = f"""GP - Games Played; W - Wins; L - Losses; OT - Overtime/Shootout Losses (Worth One Point);
+                              PTS - Points; PTS% - Points Percentage; GFA - Goals Per Game; GAA - Goals Against Per Game;
+                              GGARatio - Goals Scored Versus Goals Against Ratio; PP - Power Play Opportunities; PP% - Power Play Percentage;
+                              PPG - Power Play Goals; PPGA - Power Play Goals Against; SA - Shots Per Game; SAA - Shots Allowed Per Game;
+                              FO - Face Offs Taken; FO% - Face Off Winning Percentage; S% - Shooting Percentage;
+                              SV% - Save Percentage
+                            """
 
     abbr = {
         "games": "GP",
@@ -210,18 +229,18 @@ def displayStats(stats1, stats2, statsType):
         "gamesPlayed": "GP",
         "pts": "PTS",
         "ptPctg": "PTS%",
-        "goalsPerGame": "G/G",
-        "goalsAgainstPerGame": "GA/G",
+        "goalsPerGame": "GFA",
+        "goalsAgainstPerGame": "GAA",
         "evGGARatio": "GGARatio",
         "powerPlayPercentage": "PP%",
         "powerPlayGoalsAgainst": "PPGA",
         "powerPlayOpportunities": "PP",
-        "shotsPerGame": "S/G",
-        "shotsAllowed": "SA/G",
+        "shotsPerGame": "SA",
+        "shotsAllowed": "SAA",
         "faceOffsTaken": "FO",
         "faceOffWinPercentage": "FO%",
         "shootingPctg": "S%",
-        "savePctg": "SAVE%"
+        "savePctg": "SV%"
 
     }
 
@@ -280,7 +299,7 @@ def displayStats(stats1, stats2, statsType):
         margin=dict(b=0, t=0, l=0, r=0))
     fig.update_xaxes(showticklabels=False, showgrid=False)
 
-    return fig
+    return fig, footnote_string
 
 @st.cache(show_spinner=False)
 def displayScores(scores1, scores2, shots1, shots2):

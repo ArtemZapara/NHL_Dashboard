@@ -94,8 +94,9 @@ if sidebarButton == "Teams":
             team1stats = loadTeamStats(teamID1, selectedSeason1)
             team2stats = loadTeamStats(teamID2, selectedSeason2)
 
-            figureStats = displayStats(team1stats, team2stats, statsType="T")
+            figureStats, footnote = displayStats(team1stats, team2stats, statsType="T")
             st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
+            st.info(footnote)
 
         if radioB == "Shot chart":
 
@@ -198,12 +199,14 @@ if sidebarButton == "Players":
             stats2 = loadStats(playerID2, selectedSeason2)
 
             if position1 != "G" and position2 != "G":
-                figureStats = displayStats(stats1, stats2, statsType="F")
+                figureStats, footnote = displayStats(stats1, stats2, statsType="F")
                 st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
+                st.info(footnote)
 
             elif position1 == "G" and position2 == "G":
-                figureStats = displayStats(stats1, stats2, statsType="G")
+                figureStats, footnote = displayStats(stats1, stats2, statsType="G")
                 st.plotly_chart(figureStats, use_container_width=True, config={"staticPlot":True})
+                st.info(footnote)
 
             else:
                 st.error("You cannot compare a field player with a goaltender!")
