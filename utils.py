@@ -95,6 +95,22 @@ def loadRoster(teamID, season):
     return roster
 
 @st.cache(show_spinner=False)
+def get_index_by_teamID(teams, teamID):
+    index = None
+    teamIDs = [i["id"] for i in teams]
+    if teamID in teamIDs:
+        index = teamIDs.index(teamID)
+    return index
+
+@st.cache(show_spinner=False)
+def get_index_by_playerID(roster, playerID):
+    index = None
+    playerIDs = [i["person"]["id"] for i in roster]
+    if playerID in playerIDs:
+        index = playerIDs.index(playerID)
+    return index
+
+@st.cache(show_spinner=False)
 def loadPlayerInfo(playerID):
     playerURL = f"https://statsapi.web.nhl.com/api/v1/people/{playerID}"
     r = requests.get(url=playerURL)

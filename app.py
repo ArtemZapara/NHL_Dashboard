@@ -28,6 +28,15 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+if not "teamID1" in st.session_state:
+    st.session_state["teamID1"] = None
+if not "teamID2" in st.session_state:
+    st.session_state["teamID2"] = None
+if not "playerID1" in st.session_state:
+    st.session_state["playerID1"] = None
+if not "playerID2" in st.session_state:
+    st.session_state["playerID2"] = None
+
 with st.sidebar:
 
     sidebarButton = st.radio("Side", ("Players", "Teams"), horizontal=False, label_visibility="collapsed")
@@ -47,21 +56,28 @@ if sidebarButton == "Teams":
         selectedSeason1 = seasons[season1]
 
         teams1 = loadTeams(selectedSeason1)
+        stTeamIndex1 = get_index_by_teamID(teams1, st.session_state["teamID1"])
+        if stTeamIndex1 != None:
+            teamIndex1 = stTeamIndex1
+        else:
+            teamIndex1 = 0
+
         team1 = st.selectbox(
             "Select team",
             range(len(teams1)),
             key = "t1",
-            format_func=lambda x: f"{teams1[x]['name']}"
+            format_func=lambda x: f"{teams1[x]['name']}",
+            index=teamIndex1
         )
 
         teamID1 = teams1[team1]["id"]
+        st.session_state["teamID1"] = teamID1
 
         logoURL1 = logos[teamID1]
         teamLogo1 = displayTeamLogo(logoURL1)
         st.plotly_chart(teamLogo1, use_container_width=True, config={"staticPlot":True})
 
     with col3:
-
         season2 = st.selectbox(
                 "Select a season",
                 range(len(seasons)),
@@ -72,21 +88,28 @@ if sidebarButton == "Teams":
         selectedSeason2 = seasons[season2]
 
         teams2 = loadTeams(selectedSeason2)
+        stTeamIndex2 = get_index_by_teamID(teams2, st.session_state["teamID2"])
+        if stTeamIndex2 != None:
+            teamIndex2 = stTeamIndex2
+        else:
+            teamIndex2 = 1
+
         team2 = st.selectbox(
             "Select team",
             range(len(teams2)),
-            key = "t1=2",
-            format_func=lambda x: f"{teams2[x]['name']}"
+            key = "t2",
+            format_func=lambda x: f"{teams2[x]['name']}",
+            index=teamIndex2
         )
 
         teamID2 = teams2[team2]["id"]
+        st.session_state["teamID2"] = teamID2
 
         logoURL2 = logos[teamID2]
         teamLogo2 = displayTeamLogo(logoURL2)
         st.plotly_chart(teamLogo2, use_container_width=True, config={"staticPlot":True})
 
     with col2:
-
         radioB = st.radio("Type of display", ("Overall stats", "Shot chart"), horizontal=True, label_visibility="collapsed")
 
         if radioB == "Overall stats":
@@ -118,24 +141,41 @@ if sidebarButton == "Players":
         selectedSeason1 = seasons[season1]
 
         teams1 = loadTeams(selectedSeason1)
+        stTeamIndex1 = get_index_by_teamID(teams1, st.session_state["teamID1"])
+        if stTeamIndex1 != None:
+            teamIndex1 = stTeamIndex1
+        else:
+            teamIndex1 = 0
+
         team1 = st.selectbox(
             "Select team",
             range(len(teams1)),
             key = "t1",
-            format_func=lambda x: f"{teams1[x]['name']}"
+            format_func=lambda x: f"{teams1[x]['name']}",
+            index=teamIndex1
         )
 
         teamID1 = teams1[team1]["id"]
+        st.session_state["teamID1"] = teamID1
+
         roster1 = loadRoster(teamID1, selectedSeason1)
+        stPlayerIndex1 = get_index_by_playerID(roster1, st.session_state["playerID1"])
+        if stPlayerIndex1 != None:
+            playerIndex1 = stPlayerIndex1
+        else:
+            playerIndex1 = 0
 
         player1 = st.selectbox(
             "Select player",
             range(len(roster1)),
             key="r1",
-            format_func=lambda x: f"({roster1[x]['position']['code']}) {roster1[x]['person']['fullName']}"
+            format_func=lambda x: f"({roster1[x]['position']['code']}) {roster1[x]['person']['fullName']}",
+            index=playerIndex1
         )
 
         playerID1 = roster1[player1]["person"]["id"]
+        st.session_state["playerID1"] = playerID1
+
         playerInfo1 = loadPlayerInfo(playerID1)
 
         age1, height1, weight1, position1 = parseInfo(playerInfo1)
@@ -160,24 +200,41 @@ if sidebarButton == "Players":
         selectedSeason2 = seasons[season2]
 
         teams2 = loadTeams(selectedSeason2)
+        stTeamIndex2 = get_index_by_teamID(teams2, st.session_state["teamID2"])
+        if stTeamIndex2 != None:
+            teamIndex2 = stTeamIndex2
+        else:
+            teamIndex2 = 1
+
         team2 = st.selectbox(
             "Select team",
             range(len(teams2)),
             key = "t2",
-            format_func=lambda x: f"{teams2[x]['name']}"
+            format_func=lambda x: f"{teams2[x]['name']}",
+            index=teamIndex2
         )
 
         teamID2 = teams2[team2]["id"]
+        st.session_state["teamID2"] = teamID2
+
         roster2 = loadRoster(teamID2, selectedSeason2)
+        stPlayerIndex2 = get_index_by_playerID(roster2, st.session_state["playerID2"])
+        if stPlayerIndex2 != None:
+             playerIndex2 = stPlayerIndex2
+        else:
+            playerIndex2 = 1
 
         player2 = st.selectbox(
             "Select player",
             range(len(roster2)),
             key="r2",
-            format_func=lambda x: f"({roster2[x]['position']['code']}) {roster2[x]['person']['fullName']}"
+            format_func=lambda x: f"({roster2[x]['position']['code']}) {roster2[x]['person']['fullName']}",
+            index=playerIndex2
         )
 
         playerID2 = roster2[player2]["person"]["id"]
+        st.session_state["playerID2"] = playerID2
+
         playerInfo2 = loadPlayerInfo(playerID2)
 
         age2, height2, weight2, position2 = parseInfo(playerInfo2)
